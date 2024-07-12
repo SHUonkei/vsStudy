@@ -1,13 +1,20 @@
+<!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8">
-    <title>入口のページ</title>
-  </head>
-  <body>
-    <h1>入口のページ</h1>
-    <p>
-      <a href="{{url_for('studyrecords')}}">みんなの勉強記録一覧</a><br>
-      <img src="assets/logo.png">
-    </p>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <title>入口のページ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+</head>
+
+<body>
+  <div>
+  <div class="center">
+    <h1>vsStudy</h1>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    <a href="{{url_for('studyrecords')}}" class="button">みんなの勉強記録をみる</a>
+  </div>
+</div>
+</body>
+
 </html>

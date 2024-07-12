@@ -16,7 +16,7 @@ from werkzeug import Response
 DATABASE: Final[str] = './db/studybattle.db'
 
 # Flask クラスのインスタンス
-app = Flask(__name__)
+app = Flask(__name__,static_folder='templates/static')
 
 # 処理結果コードとメッセージ
 RESULT_MESSAGES: Final[dict[str, str]] = {
