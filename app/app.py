@@ -1,21 +1,50 @@
-#!/usr/keio/Anaconda3-2023.09-0/bin/python
 import sqlite3
 from typing import Final, Optional, Union
 import unicodedata
-
+import datetime
 from flask import Flask, g, redirect, render_template, request, url_for,jsonify, flash
 from werkzeug import Response
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email
+#パスワードをハッシュ化するライブラリをインポート
+from werkzeug.security import check_password_hash, generate_password_hash
 
-
-from flask_login import LoginManager,login_required,logout_user,login_user,current_user
+from flask_login import LoginManager,login_required,logout_user,login_user,current_user,UserMixin
 import os
 from dotenv import load_dotenv
 
-#クラスを読み込む
-from models import User, AuthenticationError, BadLoginReuquestError, LoginFailureError
+from models import AuthenticationError, BadLoginReuquestError, LoginFailureError
+import uuid
+
+# User model
+class User(UserMixin):
+    def __init__(self, id, name, password_hash):
+        self.id = id
+        self.name = name
+        self.password_hash = password_hash
+
+    @staticmethod
+    def get(user_id):
+        # Database connection
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM players WHERE id = ?", (user_id,))
+        row = cur.fetchone()
+        conn.close()
+        if row:
+            return User(row['id'], row['name'], row['password'])
+        return None
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+#login機能のための定義
+#UserMixin、ログイン・ログアウトで必要なライブラリをインポート
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+#パスワードをハッシュ化するライブラリをインポート
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # .envファイルの内容を読み込む
 load_dotenv()
@@ -42,147 +71,82 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('ログイン')
     
-# @app.route("/login", methods=["GET"])
-# def login():
-#     """GETのパラメータとして渡されたuserNameとpasswordと一致するデータを
-#     USER_DATABASEから探して一致するデータあればログインを許可。
-#     USER_DATABASEから取得したデータをレスポンスとして返す
+class RegistrationForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email(message='正しいメールアドレスを入力してください')])
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('登録')
 
-#     Raises:
-#         BadLoginReuquestError: userName, passwordの片方または両方が指定されていない場合
-#         LoginFailureError: USRE_DATABASEに一致するユーザーが存在しない場合
+# Load user callback
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
-#     Returns:
-#         Dict[str, str]: {"userId": ユーザーを一意に特定できる値, "userName": ユーザー名}
-#     """
-
-#     user_name = request.args.get("userName", None)
-#     password = request.args.get("password", None)
-
-#     auth_user = user_authentication(user_name, password)  # type: ignore
-
-#     if auth_user == {}:
-#         raise LoginFailureError()
-
-#     res = {"userId": auth_user["player_id"], "userName": auth_user["name"]}
-
-#     # 後でログインが必要なページにアクセスした際にユーザーを一意に特定できる値をUserオブジェクトに設定する
-#     # Userクラスに指定したuser_idの値がcookieに設定され、後で呼び出されるuser_loaderでuser_idが利用される
-#     user = User(auth_user["player_id"])
-#     login_user(user, remember=True)
-
-#     return jsonify(res), 200
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        #フォーム入力したアドレスがDB内にあるか検索
         user_email = form.email.data
         password = form.password.data
-        auth_user = user_authentication(user_email, password)  # type: ignore
-        if auth_user is not None:
-            user = User(auth_user["id"], auth_user["name"])
+        user = user_authentication(user_email, password)
+        if user:
             login_user(user, remember=True)
-            #ログイン処理。ログイン状態として扱われる。
-            next = request.args.get('next')
-            if next == None or not next[0] == '/':
-                next = url_for('show_user_data')
-            return redirect(next)
-
+            next_page = request.args.get('next')
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('show_user_data')
+            return redirect(next_page)
     return render_template('login.html', form=form)
 
-@app.route("/register", methods=["GET", "POST"])
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    pass
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user_id = str(uuid.uuid4())
+        email = form.email.data
+        username = form.username.data
+        password = form.password.data
+        password_hash = generate_password_hash(password)
+        register_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        conn = sqlite3.connect(DATABASE)
+        cur = conn.cursor()
+        cur.execute("INSERT INTO players (id, name, email, password, date) VALUES (?, ?, ?, ?, ?)", (user_id, username, email, password_hash,register_date))
+        conn.commit()
+        conn.close()
+        flash('登録が完了しました', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', form=form)
 
 #フォームに入力されたユーザ情報が正しいかどうかを判定する
-def user_authentication(user_email: str, password: str):
-    """user_nameとパスワードと一致するデータをUSER_DATABASEから探して一致するデータがあれば
-    取得したユーザーのデータを返す
-
-    Args:
-        user_email (str): ユーザーemail
-        password (str): パスワード
-
-    Returns:
-        Dict[str, str]: 見つかったユーザー情報を返す、見つからない時は空のDictを返す
-
-    Return Examples:
-          match: {"id": "id", "name": "foo bar", "email":"example1@gmail.com"}
-       no match: {}
-    """
-    #db 接続
-    cur = get_db().cursor()
-
-    # playersから、ユーザ名とパスワードが一致するデータを取得
-    auth = cur.execute(
-        f"""
-        SELECT 
-        *
-        FROM players p 
-        where p.email='{user_email}' and password='{password}'
-        """
-        ).fetchall()
-
-    if auth == []:
-        return {}
-
-    return auth[0]
+def user_authentication(user_email, password):
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM players WHERE email = ?", (user_email,))
+    row = cur.fetchone()
+    conn.close()
+    if row and check_password_hash(row['password'], password):
+        return User(row['id'], row['name'], row['password'])
+    return None
 
 @app.route("/user", methods=["GET"])
 @login_required
 def show_user_data():
-    """現在ログインしているユーザーの情報を返す"""
-    user_name = current_user.user_name  # type: ignore
-    user_id = current_user.user_id  # type: ignore
-
+    user_id = current_user.id
+    user_name = current_user.name
     res = {"userId": user_id, "userName": user_name}
     return jsonify(res), 200
 
-@login_manager.user_loader
-def load_user(user_id: str):
-    """ログインが必要なAPIにアクセスした際にcookieからuser_idを取得して
-    ユーザーの情報を検索してAPIにユーザーの情報を返す
-    見つからない時はNoneを返すこと
-
-    Args:
-        user_id (str): ユーザーを一意に特定できる値
-
-    Returns:
-        Union[User, None]: ユーザー情報を見つけた時はUserオブジェクトを見つからない時はNone
-    """
-     #db 接続
-    cur = get_db().cursor()
-
-    # playersから、ユーザidが一致するデータを取得
-    user_data = cur.execute(
-        f"""
-        SELECT 
-        *
-        FROM players p 
-        where p.id='{user_id}'
-        """
-        ).fetchall()
-    
-    if user_data == []:
-        return None
-
-    user = User(user_data[0]["id"], user_data[0]["name"])
-
-    return user
+@app.route("/logout", methods=["GET"])
+@login_required
+def logout():
+    logout_user()
+    return jsonify({}), 200
 
 @login_manager.unauthorized_handler
 def unatuhorized_handler():
     error_msg = {"errorMessage": "ログインが必須のページです", "statusCode": 403}
     return jsonify(error_msg), 403
-
-@app.route("/logout", methods=["GET"])
-@login_required
-def logout():
-    """ユーザーをログアウトする"""
-    logout_user()
-
-    return jsonify({}), 200
 
 from werkzeug.exceptions import HTTPException
 
