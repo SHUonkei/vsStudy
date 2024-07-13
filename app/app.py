@@ -129,24 +129,6 @@ def http_error(e):
     error_msg = {"errorMessage": e.description, "statusCode": e.code}
     return jsonify(error_msg), e.code
 
-# 処理結果コードとメッセージ
-RESULT_MESSAGES: Final[dict[str, str]] = {
-    'id-has-invalid-charactor': '指定された社員番号には使えない文字があります - 数字のみで指定してください',
-    'id-already-exists': '指定された社員番号は既に存在します - 存在しない社員番号を指定してください',
-    'id-does-not-exist': '指定された社員番号は存在しません',
-    'id-is-manager': '指定された社員番号の社員には部下がいます - 部下に登録された上司を変更してから削除してください',
-    'manager-id-has-invalid-charactor': '指定された上司の社員番号には使えない文字があります - 数字のみで指定してください',
-    'manager-id-does-not-exist': '指定された上司の社員番号が存在しません - 既に存在する社員番号か追加する社員の社員番号と同じものを指定してください',
-    'salary-has-invalid-charactor': '指定された給与には使えない文字があります - 数字のみで指定してください',
-    'birth-year-has-invalid-charactor': '指定された生年には使えない文字があります - 数字のみで指定してください',
-    'start-year-has-invalid-charactor': '指定された入社年には使えない文字があります - 数字のみで指定してください',
-    'name-has-control-charactor': '指定された名前には制御文字があります - 制御文字は指定しないでください',
-    'database-error': 'データベースエラー',
-    'added': '社員を追加しました',
-    'deleted': '削除しました',
-    'updated': '更新しました'
-}
-
 def get_db() -> sqlite3.Connection:
     db = getattr(g, '_database', None)
     if db is None:
