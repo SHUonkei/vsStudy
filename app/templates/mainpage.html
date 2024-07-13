@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>入口のページ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+</head>
+
+<body>
+  <div>
+  <div class="center">
+    <h1>こんにちは！{{ current_user.name }}さん。本日も勉強記録をつけましょう！</h1>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    <a href="{{url_for('studyrecords')}}" class="button">みんなの勉強記録をみる</a>
+    <a href="{{url_for('add-studyrecord')}}" class="button">勉強記録をつける</a>
+    <a href="{{url_for('logout')}}" class="button">ログアウト</a>
+  </div>
+</div>
+</body>
+
+</html>
