@@ -57,7 +57,7 @@ body{
 .context {
     width: 100%;
     position: absolute;
-    top:50vh;
+    top:20vh;
     z-index: 1;
 }
 

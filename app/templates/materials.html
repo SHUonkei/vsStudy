@@ -2,7 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <title>勉強記録一覧</title>
+    <title>教材一覧</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -33,22 +33,18 @@
     </style>
   </head>
   <body>
-    <h1>勉強記録一覧</h1>
+    <h1>教材一覧</h1>
 
-    {% for studyrecord in e_list %}
+    {% for material in e_list %}
     <div class="record">
       <p>
-        勉強記録番号: {{studyrecord.record_id}}<br>
-        プレイヤー: {{studyrecord.player_name}}<br>
-        教科: {{studyrecord.subject_name}}<br>
-        教材: {{studyrecord.educational_material_title}}<br>
-        開始時刻: {{studyrecord.start_time}}<br>
-        終了時刻: {{studyrecord.end_time}}<br>
+        教科: {{material.subject_name}}<br>
+        教材: {{material.educational_material_title}}<br>
       </p>
     </div>
     {% endfor %}
     <p>
-      <a href="{{url_for('record_add')}}">勉強記録を追加する</a>
+      <a href="{{url_for('material_add')}}">教材を追加する</a>
     </p>
     <p>
       <a href="{{url_for('index')}}">メインページへ戻る</a>

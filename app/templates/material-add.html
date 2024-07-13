@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>勉強記録追加</title>
+    <title>教材追加</title>
 </head>
 <body>
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -14,7 +14,7 @@
     </ul>
   {% endif %}
 {% endwith %}
-    <h2>勉強記録ページ</h2>
+    <h2>教材追加ページ</h2>
     <div>
         <a href="{{ url_for('show_user_data' )}}">マイページへ</a>
     </div>
@@ -22,19 +22,16 @@
     <p>
         <form method="POST">
             <br>
-            教材:
-            <select name="educational_material">
-                {% for material in educational_materials %}
-                <option value="{{ material.id }}">{{ material.name }}</option>
+            教材の名前: <input type="text" name="material_title" value="" placeholder="教材の名前を入力してください">
+            <br>
+            教科：<select name="subject_id">
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.name }}</option>
                 {% endfor %}
             </select>
             <br>
-            開始時刻: <input type="datetime-local" name="start_time" value="">
-            <br>
-            終了時刻: <input type="datetime-local" name="end_time" value="">
-            <br>
             <input type="submit" value="追加">
-        </form>
+          </form>
     </p>
 </body>
 </html>

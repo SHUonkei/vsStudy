@@ -7,8 +7,11 @@
             <div class="center">
                 <h1>こんにちは！{{user.name}}さん。本日も勉強記録をつけましょう！</h1>
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"  >
+                <a href="{{url_for('ranking')}}" class="button" >ランキング</a>
                 <a href="{{url_for('studyrecords')}}" class="button" >みんなの勉強記録をみる</a>
                 <a href="{{url_for('record_add')}}" class="button" >勉強記録を追加する</a>
+                <a href="{{url_for('materials')}}" class="button" >教材一覧</a>
+                <a href="{{url_for('subjects')}}" class="button" >教科一覧</a>
                 <a href="{{url_for('logout')}}" class="button" >ログアウト</a>
             </div>
         </div>

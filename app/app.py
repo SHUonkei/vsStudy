@@ -15,7 +15,7 @@ load_dotenv()
 DATABASE: Final[str] = os.environ['PATH_TO_DB']
 
 # Flask クラスのインスタンス
-app = Flask(__name__, static_folder='templates/static')
+app = Flask(__name__, static_folder='static')
 app.config["SECRET_KEY"] = os.environ['SECRET_KEY']
 # 日本語の文字化け対策
 app.json.ensure_ascii = False
@@ -101,7 +101,7 @@ def show_user_data():
 @app.route("/logout", methods=["GET"])
 def logout():
     session.pop('user_id', None)
-    return jsonify({}), 200
+    return redirect(url_for('index'))
 
 @app.errorhandler(403)
 def unauthorized_handler(e):
@@ -178,9 +178,11 @@ def studyrecords() -> str:
 
 @app.route('/record-add', methods=['GET', 'POST'])
 def record_add() -> str:
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'success')
+        return redirect(url_for('login'))
     if request.method == 'POST':
         record_id = str(uuid.uuid4())
-        subject_id = request.form['subject']
         educational_material_id = request.form['educational_material']
         start_time = datetime.datetime.now()
         end_time = start_time + datetime.timedelta(hours=1)  # Example: adding 1 hour
@@ -211,6 +213,128 @@ def record_add() -> str:
     educational_materials = cur.execute("SELECT id, name FROM educational_materials").fetchall()
     
     return render_template('record-add.html', subjects=subjects, educational_materials=educational_materials)
+
+@app.route('/materials')
+def materials() -> str:
+    cur = get_db().cursor()
+    e_list = cur.execute(
+        """
+        SELECT 
+            em.name as educational_material_title,
+            s.name as subject_name
+        FROM educational_materials em
+        join subjects s
+            on s.id=em.subject_id
+        """
+    ).fetchall()
+    return render_template('materials.html', e_list=e_list)
+
+@app.route('/material-add', methods=['GET', 'POST'])
+def material_add() -> str:
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'success')
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        record_id = str(uuid.uuid4())
+        material_title = request.form['material_title']
+        subject_id = request.form['subject_id']
+        
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO educational_materials 
+                (id, name, subject_id) 
+            VALUES 
+                (?, ?, ?)
+            """,
+            (record_id, material_title, subject_id)
+        )
+        conn.commit()
+        flash('Record added successfully!', 'success')
+        return redirect(url_for('materials'))
+
+    conn = get_db()
+    cur = conn.cursor()
+    subjects = cur.execute("SELECT id, name FROM subjects").fetchall()
+    
+    return render_template('material-add.html', subjects=subjects)
+
+@app.route('/subjects')
+def subjects() -> str:
+    cur = get_db().cursor()
+    e_list = cur.execute(
+        """
+        SELECT 
+            s.name as subject_name
+        FROM subjects s
+        """
+    ).fetchall()
+    return render_template('subjects.html', e_list=e_list)
+
+@app.route('/subject-add', methods=['GET', 'POST'])
+def subject_add() -> str:
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'success')
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        record_id = str(uuid.uuid4())
+        subject_title = request.form['subject_title']
+        
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO subjects 
+                (id, name) 
+            VALUES 
+                (?, ?)
+            """,
+            (record_id, subject_title)
+        )
+        conn.commit()
+        flash('Record added successfully!', 'success')
+        return redirect(url_for('subjects'))
+
+    conn = get_db()
+    cur = conn.cursor()
+    subjects = cur.execute("SELECT id, name FROM subjects").fetchall()
+    
+    return render_template('subject-add.html', subjects=subjects)
+
+@app.route('/ranking')
+def ranking() -> str:
+    cur = get_db().cursor()
+    e_list = cur.execute(
+        """
+        SELECT 
+            p.name,
+            a.total_study_time,
+            a.total_win,
+            a.total_lose,
+            a.total_draw
+        FROM players p
+        JOIN achievements a
+        ON p.id = a.player_id
+        """
+    ).fetchall()
+
+    # Sort e_list based on the rules
+    sorted_e_list = sorted(
+        e_list,
+        key=lambda x: x[ 'total_study_time' ] * ( x['total_win'] / (x['total_draw'] + x['total_win'] + x['total_lose'])),
+        reverse=True
+    )
+
+    # Assign ranks
+    ranked_e_list = []
+    rank = 1
+    for index, player in enumerate(sorted_e_list):
+        rank = index + 1
+        rate = player['total_study_time']*player['total_win'] / (player['total_draw'] + player['total_win'] + player['total_lose'])
+        ranked_e_list.append((rank, rate, player))
+
+    return render_template('ranking.html', ranked_e_list=ranked_e_list)
 
 
 if __name__ == '__main__':
