@@ -1,25 +1,23 @@
 <h2>ログインページ</h2>
 <div>
   <a href="{{ url_for('register' )}}">
-      新規登録へ
+    新規登録へ
   </a>
 </div>
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
-  <ul class=flashes>
+<ul class=flashes>
   {% for category, message in messages %}
-    <li class="{{ category }}">{{ message }}</li>
+  <li class="{{ category }}">{{ message }}</li>
   {% endfor %}
-  </ul>
+</ul>
 {% endif %}
 {% endwith %}
 
 <p>
-  <form method="POST">
-    email:  <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
-    password: <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
-    <input type="submit" value="ログイン">
-  </form>
+<form method="POST">
+  email: <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
+  password: <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
+  <input type="submit" value="ログイン">
+</form>
 </p>
-
-

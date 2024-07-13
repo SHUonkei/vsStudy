@@ -2,44 +2,54 @@
 <html lang="ja">
 
 <body>
-    <div class="context">
+  <div class="context">
+    <div>
+      <div class="center">
+        <h1>vsStudy</h1>
         <div>
-            <div class="center">
-                <h1>vsStudy</h1>
-                <h3>全国の同士と勉強時間を競い合い, 学力向上を目指す.</h3>
-                <h3>目指せレート1位!!</h3>
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"  >
-                <a href="{{url_for('studyrecords')}}" class="button" >みんなの勉強記録をみる</a>
-                <a href="{{url_for('materials')}}" class="button" >教材一覧</a>
-                <a href="{{url_for('subjects')}}" class="button" >教科一覧</a>
-                <a href="{{url_for('login')}}" class="button" >ログイン</a>
-                <a href="{{url_for('register')}}" class="button" >新規登録</a>
-                <a href="{{url_for('show_user_data')}}" class="button" >マイページへ</a>
-            </div>
+          <h3>全国の同士と勉強時間を競い合い, 学力向上を目指す.</h3>
+          <h3>目指せレート1位!!</h3>
         </div>
-
+        <div>
+          <a href="{{url_for('ranking')}}" class="button">ランキングをみる</a>
+        </div>
+        <br>
+        <div>
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+          <a href="{{url_for('studyrecords')}}" class="button">みんなの勉強記録をみる</a>
+          <a href="{{url_for('materials')}}" class="button">教材一覧</a>
+          <a href="{{url_for('subjects')}}" class="button">教科一覧</a>
+        </div>
+        <div>
+          <a href="{{url_for('login')}}" class="button">ログイン</a>
+          <a href="{{url_for('register')}}" class="button">新規登録</a>
+          <a href="{{url_for('show_user_data')}}" class="button">マイページへ</a>
+        </div>
+      </div>
     </div>
 
-    <div class="area">
-        <ul class="circles">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
-    </div>
+  </div>
 
-    <head>
-        <meta charset="UTF-8">
-        <title>入口のページ</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
-    </head>
+  <div class="area">
+    <ul class="circles">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </div>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>入口のページ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+  </head>
 
 </body>
 

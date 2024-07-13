@@ -1,59 +1,66 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8">
-    <title>教科一覧</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f8ff;
-        color: #333;
-        margin: 0;
-        padding: 20px;
-      }
-      h1 {
-        color: #1e90ff;
-        border-bottom: 2px solid #1e90ff;
-        padding-bottom: 10px;
-      }
-      .record {
-        background-color: #ffffff;
-        border: 1px solid #1e90ff;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-      }
-      a {
-        color: #1e90ff;
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>教科一覧</h1>
 
-    {% for subject in e_list %}
-    <div class="record">
-      <p>
-        教科: {{subject.subject_name}}<br>
-      </p>
-    </div>
-    {% endfor %}
+<head>
+  <meta charset="UTF-8">
+  <title>教科一覧</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #1e90ff;
+      border-bottom: 2px solid #1e90ff;
+      padding-bottom: 10px;
+    }
+
+    .record {
+      background-color: #ffffff;
+      border: 1px solid #1e90ff;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    a {
+      color: #1e90ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>教科一覧</h1>
+
+  {% for subject in e_list %}
+  <div class="record">
     <p>
-      <a href="{{url_for('subject_add')}}">教科を追加する</a>
+      教科: {{subject.subject_name}}<br>
     </p>
-    <p>
-      <a href="{{url_for('material_add')}}">教材を追加する</a>
-    </p>
-    <p>
-      <a href="{{url_for('index')}}">メインページへ戻る</a>
-    </p>
-    <p>
-      <a href="{{url_for('show_user_data')}}">マイページへ戻る</a>
-    </p>
-    
-  </body>
+  </div>
+  {% endfor %}
+  <p>
+    <a href="{{url_for('subject_add')}}">教科を追加する</a>
+  </p>
+  <p>
+    <a href="{{url_for('material_add')}}">教材を追加する</a>
+  </p>
+  <p>
+    <a href="{{url_for('index')}}">メインページへ戻る</a>
+  </p>
+  <p>
+    <a href="{{url_for('show_user_data')}}">マイページへ戻る</a>
+  </p>
+
+</body>
+
 </html>

@@ -66,20 +66,34 @@ def register():
         password = request.form['password']
         password_hash = generate_password_hash(password)
         register_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        file = request.files['icon']
+        file.save(os.path.join('./static/icon', file.filename))
+
         conn = sqlite3.connect(DATABASE)
         cur = conn.cursor()
         cur.execute("""
                     INSERT INTO players 
-                        (id, name, email, password, date) 
+                        (id, name, email, password, date, icon_path) 
                     VALUES 
-                        (?, ?, ?, ?, ?)
+                        (?, ?, ?, ?, ?, ?)
                     """, 
-                    (user_id, username, email, password_hash, register_date))
+                    (user_id, username, email, password_hash, register_date, file.filename))
+        
+        record_id = str(uuid.uuid4())
+        cur.execute("""
+                    INSERT INTO achievements
+                        (id,player_id, total_study_time, total_win, total_lose, total_draw)
+                    VALUES
+                        (?,?, 0, 0, 0, 0)
+                    """,
+                    (record_id,user_id,))
+        
         conn.commit()
         conn.close()
         flash('Registration successful', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
+
 
 def user_authentication(user_email, password):
     conn = sqlite3.connect(DATABASE)
@@ -184,8 +198,13 @@ def record_add() -> str:
     if request.method == 'POST':
         record_id = str(uuid.uuid4())
         educational_material_id = request.form['educational_material']
-        start_time = datetime.datetime.now()
-        end_time = start_time + datetime.timedelta(hours=1)  # Example: adding 1 hour
+
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+
+        start_time = datetime.datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+        end_time = datetime.datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+
         player_id = session.get('user_id')
 
         if not player_id:
@@ -203,6 +222,19 @@ def record_add() -> str:
             """,
             (record_id,player_id, educational_material_id, start_time, end_time)
         )
+        
+        # Update total study time
+        # 分単位で記録
+        total_study_time = (end_time - start_time).total_seconds() / 60
+        cur.execute(
+            """
+            UPDATE achievements
+            SET total_study_time = total_study_time + ?
+            WHERE player_id = ?
+            """,
+            (total_study_time, player_id)
+        )
+        
         conn.commit()
         flash('Record added successfully!', 'success')
         return redirect(url_for('studyrecords'))
@@ -309,6 +341,7 @@ def ranking() -> str:
         """
         SELECT 
             p.name,
+            p.icon_path,
             a.total_study_time,
             a.total_win,
             a.total_lose,
@@ -322,7 +355,7 @@ def ranking() -> str:
     # Sort e_list based on the rules
     sorted_e_list = sorted(
         e_list,
-        key=lambda x: x[ 'total_study_time' ] * ( x['total_win'] / (x['total_draw'] + x['total_win'] + x['total_lose'])),
+        key=lambda x: x[ 'total_study_time' ] * ( x['total_win'] / (x['total_draw'] + x['total_win'] + x['total_lose'] + 0.1)),
         reverse=True
     )
 
@@ -331,10 +364,188 @@ def ranking() -> str:
     rank = 1
     for index, player in enumerate(sorted_e_list):
         rank = index + 1
-        rate = player['total_study_time']*player['total_win'] / (player['total_draw'] + player['total_win'] + player['total_lose'])
+        rate = player['total_study_time']*player['total_win'] / (player['total_draw'] + player['total_win'] + player['total_lose'] + 0.1)
         ranked_e_list.append((rank, rate, player))
 
     return render_template('ranking.html', ranked_e_list=ranked_e_list)
+
+@app.route('/challenge', methods=['GET', 'POST'])
+def challenge():
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'danger')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        battle_id = str(uuid.uuid4())
+        player_id = session['user_id']
+        opponent_id = request.form['opponent_id']
+        battle_date = datetime.datetime.now()
+        start_time = battle_date
+        end_time = None
+        winner_id = None
+        current_state = 'pending'
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO battles 
+                (id, player_id, opponent_id, date, start_time, end_time, winner_id, current_state) 
+            VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?)
+            """, 
+            (battle_id, player_id, opponent_id, battle_date, start_time, end_time, winner_id, current_state))
+        conn.commit()
+        conn.close()
+        
+        flash('Challenge sent successfully!', 'success')
+        return redirect(url_for('challenges'))
+    
+    conn = get_db()
+    cur = conn.cursor()
+    players = cur.execute("SELECT id, name FROM players WHERE id != ?", (session['user_id'],)).fetchall()
+    conn.close()
+    
+    return render_template('challenge.html', players=players)
+
+
+@app.route('/challenges')
+def challenges():
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'danger')
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    cur = conn.cursor()
+    challenges = cur.execute(
+        """
+        SELECT 
+            b.id, 
+            b.date,
+            b.player_id,
+            b.opponent_id,
+            b.current_state,
+            p1.name AS player_name, 
+            p2.name AS opponent_name,
+            b.winner_id 
+        FROM battles b
+        JOIN players p1 ON b.player_id = p1.id
+        JOIN players p2 ON b.opponent_id = p2.id
+        WHERE b.opponent_id = ? OR b.player_id = ?
+        """,
+        (session['user_id'], session['user_id'])).fetchall()
+    conn.close()
+    
+    return render_template('challenges.html', challenges=challenges)
+
+
+@app.route('/accept-challenge/<battle_id>', methods=['POST'])
+def accept_challenge(battle_id):
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'danger')
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    battle = cur.execute("SELECT * FROM battles WHERE id = ?", (battle_id,)).fetchone()
+    if not battle:
+        flash('Challenge not found.', 'danger')
+        return redirect(url_for('challenges'))
+    
+    if battle['opponent_id'] != session['user_id']:
+        flash('You are not authorized to accept this challenge.', 'danger')
+        return redirect(url_for('challenges'))
+    
+    cur.execute("""
+        UPDATE battles 
+        SET current_state = ?
+        WHERE id = ?
+    """, ('playing', battle_id)
+    )
+    conn.commit()
+    conn.close()
+    
+    flash('Challenge accepted!', 'success')
+    return redirect(url_for('challenges'))
+
+@app.route('/finish-challenge/<battle_id>', methods=['POST'])
+def finish_challenge(battle_id):
+    if 'user_id' not in session:
+        flash('ログインしてください.', 'danger')
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    battle = cur.execute("SELECT * FROM battles WHERE id = ?", (battle_id,)).fetchone()
+    if not battle:
+        flash('Challenge not found.', 'danger')
+        return redirect(url_for('challenges'))
+    
+    if battle['opponent_id'] != session['user_id']:
+        flash('You are not authorized to accept this challenge.', 'danger')
+        return redirect(url_for('challenges'))
+    
+    # Calculate study times for the day
+    today = datetime.date.today()
+    player_study_time = cur.execute("""
+        SELECT SUM(julianday(end_time) - julianday(start_time)) * 24
+        FROM studyrecords 
+        WHERE player_id = ? AND date(start_time) = ?
+    """, (battle['player_id'], today)).fetchone()[0] or 0
+    
+    opponent_study_time = cur.execute("""
+        SELECT SUM(julianday(end_time) - julianday(start_time)) * 24
+        FROM studyrecords 
+        WHERE player_id = ? AND date(start_time) = ?
+    """, (battle['opponent_id'], today)).fetchone()[0] or 0
+    
+    winner_id = None
+    loser_id = None
+    if player_study_time > opponent_study_time:
+        winner_id = battle['player_id']
+        loser_id = battle['opponent_id']
+    elif opponent_study_time > player_study_time:
+        winner_id = battle['opponent_id']
+        loser_id = battle['player_id']
+    
+    cur.execute("""
+        UPDATE battles 
+        SET end_time = ?, winner_id = ?, current_state = ?
+        WHERE id = ?
+    """, (datetime.datetime.now(), winner_id,'finish', battle_id))
+
+    # Update achievements
+    if winner_id:
+        cur.execute("""
+            UPDATE achievements 
+            SET total_win = total_win + 1
+            WHERE player_id = ?
+        """, (winner_id,))
+        
+        cur.execute("""
+            UPDATE achievements 
+            SET total_lose = total_lose + 1
+            WHERE player_id = ?
+        """, (loser_id,))
+        
+    else:
+        cur.execute("""
+            UPDATE achievements 
+            SET total_draw = total_draw + 1
+            WHERE player_id = ?
+        """, (battle['player_id'],))
+        cur.execute("""
+            UPDATE achievements 
+            SET total_draw = total_draw + 1
+            WHERE player_id = ?
+        """, (battle['opponent_id'],))
+
+    conn.commit()
+    conn.close()
+    
+    flash('Challenge completed!', 'success')
+    return redirect(url_for('challenges'))
 
 
 if __name__ == '__main__':

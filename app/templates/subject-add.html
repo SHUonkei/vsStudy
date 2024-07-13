@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <title>教科追加</title>
+  <meta charset="UTF-8">
+  <title>教科追加</title>
 </head>
+
 <body>
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <ul class=flashes>
+  <ul class=flashes>
     {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
+    <li class="{{ category }}">{{ message }}</li>
     {% endfor %}
-    </ul>
+  </ul>
   {% endif %}
-{% endwith %}
-    <h2>教科追加ページ</h2>
-    <div>
-        <a href="{{ url_for('show_user_data' )}}">マイページへ</a>
-    </div>
+  {% endwith %}
+  <h2>教科追加ページ</h2>
+  <div>
+    <a href="{{ url_for('show_user_data' )}}">マイページへ</a>
+  </div>
 
-    <p>
-        <form method="POST">
-            <br>
-            教科の名前: <input type="text" name="subject_title" value="" placeholder="教科の名前を入力してください">
-            <br>
-            <input type="submit" value="追加">
-          </form>
-    </p>
+  <p>
+  <form method="POST">
+    <br>
+    教科の名前: <input type="text" name="subject_title" value="" placeholder="教科の名前を入力してください">
+    <br>
+    <input type="submit" value="追加">
+  </form>
+  </p>
 </body>
+
 </html>

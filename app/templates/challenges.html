@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Challenges</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/table.css') }}">
+
+</head>
+
+<body>
+    <div class="context">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class=flashes>
+            {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <h2>対戦記録</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>対戦開始日時</th>
+                    <th>挑戦者</th>
+                    <th>承諾者</th>
+                    <th>勝者</th>
+                    <th>アクション</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for challenge in challenges %}
+                <tr>
+                    <td>{{ challenge.date }}</td>
+                    <td>{{ challenge.player_name }}</td>
+                    <td>{{ challenge.opponent_name }}</td>
+                    <td>
+                        {% if challenge.winner_id %}
+                        {% if challenge.winner_id == challenge.player_id %}
+                        {{ challenge.player_name }}
+                        {% else %}
+                        {{ challenge.opponent_name }}
+                        {% endif %}
+                        {% else %}
+                        {{ challenge.current_state}}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if challenge.current_state=='pending' and challenge.opponent_id==session['user_id']%}
+                        <form method="POST" action="{{ url_for('accept_challenge', battle_id=challenge.id) }}">
+                            <button type="submit">対戦を受け入れる</button>
+                        </form>
+                        {% endif %}
+
+                        {% if challenge.current_state=='playing'%}
+                        <form method="POST" action="{{ url_for('finish_challenge', battle_id=challenge.id) }}">
+                            <button type="submit">対戦を終了する</button>
+                        </form>
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{url_for('show_user_data')}}" class="button">マイページへ</a>
+    </div>
+    <div class="area">
+        <ul class="circles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</body>
+
+</html>

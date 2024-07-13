@@ -1,17 +1,16 @@
 <h2>新規登録ページ</h2>
 <div>
   <a href="{{ url_for('index' )}}">
-      メインページへ
+    メインページへ
   </a>
 </div>
 
 <p>
-  <form method="POST">
-    name: <input type="text" name="username" value="" placeholder="名前を入力して下さい"> <br>
-    email:  <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
-    password: <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
-    <input type="submit" value="登録">
-  </form>
+<form method="POST" enctype="multipart/form-data">
+  名前: <input type="text" name="username" value="" placeholder="名前を入力して下さい"> <br>
+  email: <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
+  パスワード: <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
+  アイコン: <input type="file" name="icon">
+  <input type="submit" value="登録">
+</form>
 </p>
-
-
