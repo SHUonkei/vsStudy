@@ -3,10 +3,10 @@ from typing import Final, Optional, Union
 import unicodedata
 import datetime
 from flask import Flask, g, redirect, render_template, request, url_for, jsonify, flash, session
-from werkzeug.security import check_password_hash, generate_password_hash
 import os
 from dotenv import load_dotenv
 import uuid
+import hashlib
 
 # .envファイルの内容を読み込む
 load_dotenv()
@@ -39,7 +39,7 @@ class User:
         return None
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return generate_sha1_hash(password) == self.password_hash
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,6 +57,9 @@ def login():
             flash('Invalid email or password', 'danger')
     return render_template('login.html')
 
+def generate_sha1_hash(password):
+    return hashlib.sha1(password.encode()).hexdigest()
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -64,7 +67,7 @@ def register():
         email = request.form['email']
         username = request.form['username']
         password = request.form['password']
-        password_hash = generate_password_hash(password)
+        password_hash = generate_sha1_hash(password)
         register_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         file = request.files['icon']
         file.save(os.path.join('./static/icon', file.filename))
@@ -102,7 +105,7 @@ def user_authentication(user_email, password):
     cur.execute("SELECT * FROM players WHERE email = ?", (user_email,))
     row = cur.fetchone()
     conn.close()
-    if row and check_password_hash(row['password'], password):
+    if row and (row['password']==generate_sha1_hash(password)):
         return User(row['id'], row['name'], row['password'])
     return None
 
