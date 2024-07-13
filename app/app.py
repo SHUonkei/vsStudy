@@ -7,13 +7,10 @@ from werkzeug import Response
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email
-#パスワードをハッシュ化するライブラリをインポート
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from flask_login import LoginManager,login_required,logout_user,login_user,current_user,UserMixin
 import os
 from dotenv import load_dotenv
-
 from models import AuthenticationError, BadLoginReuquestError, LoginFailureError
 import uuid
 
@@ -132,10 +129,7 @@ def user_authentication(user_email, password):
 @app.route("/user", methods=["GET"])
 @login_required
 def show_user_data():
-    user_id = current_user.id
-    user_name = current_user.name
-    res = {"userId": user_id, "userName": user_name}
-    return jsonify(res), 200
+    return render_template('mainpage.html')
 
 @app.route("/logout", methods=["GET"])
 @login_required
@@ -350,47 +344,47 @@ def studyrecords() -> str:
 #     return render_template('employees.html', e_list=e_list)
 
 
-# @app.route('/employee/<id>')
-# def employee(id: str) -> str:
-#     """
-#     社員詳細ページ.
+@app.route('/player/<id>')
+def player(id: str) -> str:
+    """
+    社員詳細ページ.
 
-#     `http://localhost:5000/employee/<id>` への GET メソッドによる
-#     リクエストがあった時に Flask が呼ぶ関数。
+    `http://localhost:5000/employee/<id>` への GET メソッドによる
+    リクエストがあった時に Flask が呼ぶ関数。
 
-#     データベース接続を得て、
-#     URL 中の `<id>` で指定された社員番号の社員の全情報を取得し、
-#     テンプレート employee.html へ情報を渡して埋め込んでレンダリングして返す。
-#     指定された社員が見つからない場合は
-#     テンプレート employee-not-found.html
-#     （社員が見つからない旨が記載されている）
-#     をレンダリングして返す。
+    データベース接続を得て、
+    URL 中の `<id>` で指定された社員番号の社員の全情報を取得し、
+    テンプレート employee.html へ情報を渡して埋め込んでレンダリングして返す。
+    指定された社員が見つからない場合は
+    テンプレート employee-not-found.html
+    （社員が見つからない旨が記載されている）
+    をレンダリングして返す。
 
-#     Returns:
-#       str: ページのコンテンツ
-#     """
-#     # データベース接続してカーソルを得る
-#     con = get_db()
-#     cur = con.cursor()
+    Returns:
+      str: ページのコンテンツ
+    """
+    # データベース接続してカーソルを得る
+    con = get_db()
+    cur = con.cursor()
 
-#     try:
-#         # 文字列型で渡された社員番号を整数型へ変換する
-#         id_num = int(id)
-#     except ValueError:
-#         # 社員番号が整数型へ変換できない→不正な社員番号が指定された
-#         # →データベースにあたるまでもなくそのような社員は見つからない
-#         return render_template('employee-not-found.html')
+    try:
+        # 文字列型で渡された社員番号を整数型へ変換する
+        id_num = int(id)
+    except ValueError:
+        # 社員番号が整数型へ変換できない→不正な社員番号が指定された
+        # →データベースにあたるまでもなくそのような社員は見つからない
+        return render_template('employee-not-found.html')
 
-#     # employees テーブルから指定された社員番号の行を 1 行だけ取り出す
-#     employee = cur.execute('SELECT * FROM employees WHERE id = ?',
-#                            (id_num,)).fetchone()
+    # employees テーブルから指定された社員番号の行を 1 行だけ取り出す
+    employee = cur.execute('SELECT * FROM employees WHERE id = ?',
+                           (id_num,)).fetchone()
 
-#     if employee is None:
-#         # 指定された社員番号の行が無かった
-#         return render_template('employee-not-found.html')
+    if employee is None:
+        # 指定された社員番号の行が無かった
+        return render_template('employee-not-found.html')
 
-#     # 社員の情報をテンプレートへ渡してレンダリングしたものを返す
-#     return render_template('employee.html', employee=employee)
+    # 社員の情報をテンプレートへ渡してレンダリングしたものを返す
+    return render_template('employee.html', employee=employee)
 
 
 # @app.route('/employee-add')
