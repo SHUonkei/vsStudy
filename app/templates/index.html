@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
-
+<head>
+  <meta charset="UTF-8">
+  <title>入口のページ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+</head>
 <body>
   <div class="context">
     <div>
@@ -27,9 +31,7 @@
         </div>
       </div>
     </div>
-
   </div>
-
   <div class="area">
     <ul class="circles">
       <li></li>
@@ -44,13 +46,5 @@
       <li></li>
     </ul>
   </div>
-
-  <head>
-    <meta charset="UTF-8">
-    <title>入口のページ</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
-  </head>
-
 </body>
-
 </html>

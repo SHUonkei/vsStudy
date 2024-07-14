@@ -64,3 +64,19 @@ CREATE TABLE achievements (
 	total_draw INTEGER,
 	FOREIGN KEY (player_id) REFERENCES players (id)
 );
+
+-- ビューの作成
+# このビューは、プレイヤーのランキングを表示するためのビュー
+create view rankings as
+SELECT 
+    p.name,
+    p.icon_path,
+    a.total_study_time,
+    a.total_win,
+    a.total_lose,
+    a.total_draw
+FROM players p
+JOIN achievements a
+ON p.id = a.player_id
+
+-- プレイヤーのランキングを表示するためのビュー

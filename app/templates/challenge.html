@@ -2,33 +2,42 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Challenge</title>
+  <meta charset="UTF-8">
+  <title>対戦するプレイヤーを選ぶ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/login.css') }}">
 </head>
 
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul class=flashes>
-        {% for category, message in messages %}
-        <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-
+  <div class="login-container">
     <h2>対戦するプレイヤーを選ぶ</h2>
-    <form method="POST">
-        <label for="opponent_id">対戦するプレイヤーを選んでください:</label>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+
+        <label for="opponent_id">対戦するプレイヤーを選んでください</label>
         <select name="opponent_id" id="opponent_id">
             {% for player in players %}
             <option value="{{ player.id }}">{{ player.name }}</option>
             {% endfor %}
         </select>
-        <button type="submit">対戦申請を送る</button>
-    </form>
-    <a href="{{url_for('show_user_data')}}" class="button">マイページへ</a>
 
+    
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class=flashes>
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+      <button type="submit">対戦申請を送る</button>
+
+    </div>
+    </form>
+    <p>マイページへ<a href="{{ url_for('show_user_data')}}">戻る</a></p>
+    
+  </div>
 </body>
 
 </html>

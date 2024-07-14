@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 import uuid
 import hashlib
+import re
 
 # .envファイルの内容を読み込む
 load_dotenv()
@@ -19,6 +20,12 @@ app = Flask(__name__, static_folder='static')
 app.config["SECRET_KEY"] = os.environ['SECRET_KEY']
 # 日本語の文字化け対策
 app.json.ensure_ascii = False
+
+#メインページ
+@app.route('/')
+def index() -> str:
+    return render_template('index.html')
+
 
 class User:
     def __init__(self, id, name, password_hash):
@@ -60,6 +67,10 @@ def login():
 def generate_sha1_hash(password):
     return hashlib.sha1(password.encode()).hexdigest()
 
+def validate_email_syntax(email):
+    pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return re.match(pattern, email) is not None
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -70,8 +81,28 @@ def register():
         password_hash = generate_sha1_hash(password)
         register_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         file = request.files['icon']
-        file.save(os.path.join('./static/icon', file.filename))
+        if file:        
+            file.save(os.path.join('./static/icon', file.filename))
 
+        #validation
+        if not email or not username or not password:
+            flash('全てのフィールドを埋めてください', 'danger')
+            return redirect(url_for('register'))
+        
+        if len(password) < 8:
+            flash('パスワードは8文字以入力してください', 'danger')
+            return redirect(url_for('register'))
+
+        if len(username) < 3:
+            flash('ユーザーネームは3文字以上入力してください', 'danger')
+            return redirect(url_for('register'))
+        
+        #email validation
+        if not validate_email_syntax(email):
+            flash('正しいメールアドレスを入力してください', 'danger')
+            return redirect(url_for('register'))        
+        
+        
         conn = sqlite3.connect(DATABASE)
         cur = conn.cursor()
         cur.execute("""
@@ -144,13 +175,6 @@ def close_connection(exception: Optional[BaseException]) -> None:
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
-def has_control_character(s: str) -> bool:
-    return any(map(lambda c: unicodedata.category(c) == 'Cc', s))
-
-@app.route('/')
-def index() -> str:
-    return render_template('index.html')
 
 @app.route('/studyrecords')
 def studyrecords() -> str:
@@ -322,18 +346,12 @@ def subject_add() -> str:
 @app.route('/ranking')
 def ranking() -> str:
     cur = get_db().cursor()
+    #viewの利用
     e_list = cur.execute(
         """
         SELECT 
-            p.name,
-            p.icon_path,
-            a.total_study_time,
-            a.total_win,
-            a.total_lose,
-            a.total_draw
-        FROM players p
-        JOIN achievements a
-        ON p.id = a.player_id
+            *
+        FROM rankings
         """
     ).fetchall()
 

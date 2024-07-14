@@ -1,16 +1,40 @@
-<h2>新規登録ページ</h2>
-<div>
-  <a href="{{ url_for('index' )}}">
-    メインページへ
-  </a>
-</div>
+<!DOCTYPE html>
+<html lang="ja">
 
-<p>
-<form method="POST" enctype="multipart/form-data">
-  名前: <input type="text" name="username" value="" placeholder="名前を入力して下さい"> <br>
-  email: <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
-  パスワード: <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
-  アイコン: <input type="file" name="icon">
-  <input type="submit" value="登録">
-</form>
-</p>
+<head>
+  <meta charset="UTF-8">
+  <title>ログイン</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/login.css') }}">
+</head>
+
+<body>
+  <div class="login-container">
+    <h2>ログインページ</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+      名前 <input type="text" name="username" value="" placeholder="名前を入力して下さい"> <br>
+      email <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
+      password <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
+      icon <input type="file" name="icon"> <br>
+      
+    
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class=flashes>
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
+      <button type="submit">登録</button>
+    </div>
+    </form>
+    <p>アカウントをお持ちの方は<a href="{{ url_for('login')}}">こちら</a></p>
+    
+  </div>
+</body>
+
+</html>
