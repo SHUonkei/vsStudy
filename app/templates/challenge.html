@@ -3,21 +3,24 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>ログイン</title>
+  <title>対戦するプレイヤーを選ぶ</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style/login.css') }}">
 </head>
 
 <body>
   <div class="login-container">
-    <h2>ログインページ</h2>
+    <h2>対戦するプレイヤーを選ぶ</h2>
 
     <form method="POST" enctype="multipart/form-data">
       <div class="form-group">
-      名前 <input type="text" name="username" value="" placeholder="名前を入力して下さい"> <br>
-      email <input type="text" name="email" value="" placeholder="emailを入力して下さい"> <br>
-      password <input type="text" name="password" value="" placeholder="パスワードを入力してください"><br>
-      icon <input type="file" name="icon"> <br>
-      
+
+        <label for="opponent_id">対戦するプレイヤーを選んでください</label>
+        <select name="opponent_id" id="opponent_id">
+            {% for player in players %}
+            <option value="{{ player.id }}">{{ player.name }}</option>
+            {% endfor %}
+        </select>
+
     
       {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -28,11 +31,11 @@
       </ul>
       {% endif %}
       {% endwith %}
+      <button type="submit">対戦申請を送る</button>
 
-      <button type="submit">登録</button>
     </div>
     </form>
-    <p>アカウントをお持ちの方は<a href="{{ url_for('login')}}">こちら</a></p>
+    <p>マイページへ<a href="{{ url_for('show_user_data')}}">戻る</a></p>
     
   </div>
 </body>

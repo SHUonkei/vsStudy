@@ -1,7 +1,3 @@
-#UserMixin、ログイン・ログアウトで必要なライブラリをインポート
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-#パスワードをハッシュ化するライブラリをインポート
-from werkzeug.security import check_password_hash, generate_password_hash
 class AuthenticationError(Exception):
     """アプリケーション内で利用する基底のエラークラス"""
 

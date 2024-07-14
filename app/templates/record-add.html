@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>勉強記録追加</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/login.css') }}">
+</head>
+
+<body>
+  <div class="login-container">
+    <h2>勉強記録追加</h2>
+
+    <form method="POST">
+      <div class="form-group">
+        教材
+        <select name="educational_material">
+          {% for material in educational_materials %}
+          <option value="{{ material.id }}">{{ material.name }}</option>
+          {% endfor %}
+        </select>
+        <br>
+        開始時刻
+        <input type="datetime-local" name="start_time" value="">
+        <br>
+        終了時刻
+        <input type="datetime-local" name="end_time" value="">
+        <br>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class=flashes>
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
+      <button type="submit">追加</button>
+    </div>
+    </form>
+    <p><a href="{{ url_for('show_user_data')}}">マイページへ戻る</a></p>
+    
+  </div>
+</body>
+
+</html>

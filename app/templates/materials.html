@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>教材一覧</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/lists.css') }}">
+</head>
+
+<body>
+  <h1>教材一覧</h1>
+
+  {% for material in e_list %}
+  <div class="record">
+    <p>
+      教科: {{material.subject_name}}<br>
+      教材: {{material.educational_material_title}}<br>
+    </p>
+  </div>
+  {% endfor %}
+  <p>
+    <a href="{{url_for('material_add')}}">教材を追加する</a>
+  </p>
+  <p>
+    <a href="{{url_for('index')}}">メインページへ戻る</a>
+  </p>
+  <p>
+    <a href="{{url_for('show_user_data')}}">マイページへ戻る</a>
+  </p>
+
+</body>
+
+</html>

@@ -1,55 +1,38 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8">
-    <title>勉強記録一覧</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f8ff;
-        color: #333;
-        margin: 0;
-        padding: 20px;
-      }
-      h1 {
-        color: #1e90ff;
-        border-bottom: 2px solid #1e90ff;
-        padding-bottom: 10px;
-      }
-      .record {
-        background-color: #ffffff;
-        border: 1px solid #1e90ff;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-      }
-      a {
-        color: #1e90ff;
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>勉強記録一覧</h1>
 
-    {% for studyrecord in e_list %}
-    <div class="record">
-      <p>
-        勉強記録番号: {{studyrecord.record_id}}<br>
-        プレイヤー: {{studyrecord.player_name}}<br>
-        教科: {{studyrecord.subject_name}}<br>
-        教材: {{studyrecord.educational_material_title}}<br>
-        開始時刻: {{studyrecord.start_time}}<br>
-        終了時刻: {{studyrecord.end_time}}<br>
-      </p>
-    </div>
-    {% endfor %}
+<head>
+  <meta charset="UTF-8">
+  <title>勉強記録一覧</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/lists.css') }}">
 
+</head>
+
+<body>
+  <h1>勉強記録一覧</h1>
+
+  {% for studyrecord in e_list %}
+  <div class="record">
     <p>
-      <a href="{{url_for('index')}}">入口のページ</a>
+      勉強記録番号: {{studyrecord.record_id}}<br>
+      プレイヤー: {{studyrecord.player_name}}<br>
+      教科: {{studyrecord.subject_name}}<br>
+      教材: {{studyrecord.educational_material_title}}<br>
+      開始時刻: {{studyrecord.start_time}}<br>
+      終了時刻: {{studyrecord.end_time}}<br>
     </p>
-  </body>
+  </div>
+  {% endfor %}
+  <p>
+    <a href="{{url_for('record_add')}}">勉強記録を追加する</a>
+  </p>
+  <p>
+    <a href="{{url_for('index')}}">メインページへ戻る</a>
+  </p>
+  <p>
+    <a href="{{url_for('show_user_data')}}">マイページへ戻る</a>
+  </p>
+
+</body>
+
 </html>
