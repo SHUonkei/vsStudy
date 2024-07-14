@@ -10,6 +10,7 @@ sqlite3 -column -header studybattle.db
 ```
 
 
+.dbファイルを共有しているため、以下の初期化はdbの変更をしたときに行うなどしてください.
 sqlite内で以下を実行.
 
 
