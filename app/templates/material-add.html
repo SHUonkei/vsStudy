@@ -4,37 +4,40 @@
 <head>
   <meta charset="UTF-8">
   <title>教材追加</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/login.css') }}">
 </head>
 
 <body>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <ul class=flashes>
-    {% for category, message in messages %}
-    <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  {% endwith %}
-  <h2>教材追加ページ</h2>
-  <div>
-    <a href="{{ url_for('show_user_data' )}}">マイページへ</a>
-  </div>
+  <div class="login-container">
+    <h2>教材追加</h2>
 
-  <p>
-  <form method="POST">
-    <br>
-    教材の名前: <input type="text" name="material_title" value="" placeholder="教材の名前を入力してください">
-    <br>
-    教科：<select name="subject_id">
-      {% for subject in subjects %}
-      <option value="{{ subject.id }}">{{ subject.name }}</option>
-      {% endfor %}
-    </select>
-    <br>
-    <input type="submit" value="追加">
-  </form>
-  </p>
+    <form method="POST">
+      <div class="form-group">
+        <br>
+        教材の名前: <input type="text" name="material_title" value="" placeholder="教材の名前を入力してください">
+        <br>
+        教科：<select name="subject_id">
+          {% for subject in subjects %}
+          <option value="{{ subject.id }}">{{ subject.name }}</option>
+          {% endfor %}
+        </select>
+           <br>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class=flashes>
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
+      <button type="submit">追加</button>
+    </div>
+    </form>
+    <p><a href="{{ url_for('show_user_data')}}">マイページへ戻る</a></p>
+    
+  </div>
 </body>
 
 </html>

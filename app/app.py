@@ -211,8 +211,18 @@ def record_add() -> str:
         start_time = request.form['start_time']
         end_time = request.form['end_time']
 
+        #バリデーション
+        if not start_time or not end_time or not educational_material_id:
+            flash('全てのフィールドを埋めてください', 'danger')
+            return redirect(url_for('record_add'))
+                
         start_time = datetime.datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
         end_time = datetime.datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+
+        if start_time > end_time:
+            flash('開始時間は終了時間より前に設定してください', 'danger')
+            return redirect(url_for('record_add'))
+ 
 
         player_id = session.get('user_id')
 
@@ -280,6 +290,10 @@ def material_add() -> str:
         material_title = request.form['material_title']
         subject_id = request.form['subject_id']
         
+        if not material_title or not subject_id:
+            flash('全てのフィールドを埋めてください', 'danger')
+            return redirect(url_for('material_add'))
+        
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
@@ -321,7 +335,9 @@ def subject_add() -> str:
     if request.method == 'POST':
         record_id = str(uuid.uuid4())
         subject_title = request.form['subject_title']
-        
+        if not subject_title:
+            flash('全てのフィールドを埋めてください', 'danger')
+            return redirect(url_for('subject_add'))
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
@@ -382,6 +398,10 @@ def challenge():
         battle_id = str(uuid.uuid4())
         player_id = session['user_id']
         opponent_id = request.form['opponent_id']
+        
+        if not opponent_id:
+            flash('相手を選択してください', 'danger')
+            return redirect(url_for('challenge'))
         battle_date = datetime.datetime.now()
         start_time = battle_date
         end_time = None
