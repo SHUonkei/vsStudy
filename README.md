@@ -2,17 +2,12 @@
 # vsStudy
 勉強時間対戦アプリ
 
-# リレーション
+## リレーション
 
 
 ![image](https://github.com/user-attachments/assets/7b837bbf-18a7-46ee-94eb-9291a7180563)
 
 
-# 画面イメージ
-
-
-![image](https://github.com/user-attachments/assets/33269b30-1815-4ae4-9497-c5704b09b4cb)
-![image](https://github.com/user-attachments/assets/1d4bf694-8d1b-47a2-aa40-e8ff96428a82)
 
 ## initialization
 
@@ -40,3 +35,10 @@ sqlite> .read insert_into.sql
 
 - 慶應義塾大学理工学部情報工学科3年授業内での製作
 - 外部ライブラリを基本用いてはならない制約のもと
+
+## 画面イメージ
+
+
+![image](https://github.com/user-attachments/assets/33269b30-1815-4ae4-9497-c5704b09b4cb)
+![image](https://github.com/user-attachments/assets/1d4bf694-8d1b-47a2-aa40-e8ff96428a82)
+
