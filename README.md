@@ -12,11 +12,10 @@
 - パスワード：password
 
 
-## リレーション
+## ER figure
 
 
-![image](https://github.com/user-attachments/assets/7b837bbf-18a7-46ee-94eb-9291a7180563)
-
+![image](https://github.com/user-attachments/assets/08a4dead-98c9-4c4e-99d0-13aeed68bb98)
 
 
 ## initialization
